@@ -16,7 +16,11 @@ html {
     --primary-bg-color: #111111;
     --secondary-bg-color: #252525;
     --header-bg-color: #0f0f0f;
-    --primary-brand-color: #0e9135;
+    --toast-exito-color: var(--primary-brand-color);
+    --toast-error-color: rgb(255, 36, 36);
+    --toast-info-color: rgb(0, 132, 169);
+    --primary-brand-color: #008929;
+    --contrast-brand-color: #00e846;
     --button-outline-color: white;
     --main-text-color: white;
     --main-font-regular: 'Inter';
@@ -41,6 +45,7 @@ html {
     border-style: none;
     padding: 0.8rem;
 }
+
 .outlineFill {
     background-color: transparent;
     border-color: var(--button-outline-color);
@@ -48,6 +53,7 @@ html {
     border-width: 0.2rem;
     padding: 0.6rem;
 }
+
 .button:hover {
     transition: 0.2s;
     scale: 1.07;
@@ -59,19 +65,23 @@ h1 {
     font-size: 50px;
     padding-bottom: 10px;
 }
+
 h2 {
     font-weight: 600;
 }
+
 h3 {
     font-size: 18px;
     font-weight: 400;
 }
+
 a {
     text-decoration: none;
     font-weight: 400;
     font-size: 18px;
     color: var(--main-text-color)
 }
+
 p {
     line-height: 20px;
 }
@@ -111,7 +121,7 @@ nav a img {
     margin-right: 20px;
 }
 
-nav > ul {
+nav>ul {
     width: 60%;
     margin: 0 20px 0 20px;
     display: flex;
@@ -119,19 +129,24 @@ nav > ul {
     align-items: center;
     list-style: none;
 }
-nav > ul > li {
+
+nav>ul>li {
     margin: 5px 10px 5px 10px;
 }
-nav > ul > li > a {
+
+nav>ul>li>a {
     text-decoration: none;
 }
+
 nav img {
     height: 120px;
     width: 120px;
 }
+
 .navActive {
-    color: var(--primary-brand-color)
+    color: var(--contrast-brand-color)
 }
+
 .contentSection {
     font-size: 1rem;
     margin: 40px 0 40px 0;
@@ -146,10 +161,11 @@ nav img {
     padding: 80px 120px 80px 120px;
 }
 
-.contentSection > h2 {
+.contentSection>h2 {
     font-size: 32px;
     margin: 20px 0 10px 0;
 }
+
 #main {
     width: 100%;
     height: 48rem;
@@ -204,24 +220,29 @@ nav img {
     flex-direction: column;
     justify-content: flex-start;
 }
+
 #formPresupuesto {
     flex-direction: row;
     justify-content: space-between;
 }
+
 .displayedForm {
     flex-direction: row;
     justify-content: space-between;
 }
-.genericForm > div {
+
+.genericForm>div {
     width: 50%;
 }
+
 .genericForm .dataInputs {
     padding-right: 30px;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
-.genericForm > .dataDisplay {
+
+.genericForm>.dataDisplay {
     padding-left: 30px;
     display: flex;
     flex-direction: column;
@@ -229,24 +250,30 @@ nav img {
     transition: 0.5s;
     transition-timing-function: ease-out;
 }
-.genericForm .dataInputs > .formInput {
+
+.genericForm .dataInputs>.formInput {
     margin: 20px 0 20px 0;
     width: 100%;
 }
-.genericForm .dataInputs > .formInput > h3 {
+
+.genericForm .dataInputs>.formInput>h3 {
     margin: 5px 0 5px 0;
 }
-.genericForm .dataInputs > .submitButton {
+
+.genericForm .dataInputs>.submitButton {
     margin: 75px 0 20px 0;
     width: 100%;
 }
-.genericForm .dataInputs > .button {
+
+.genericForm .dataInputs>.button {
     width: 100%;
 }
-.dataDisplay > h4 {
+
+.dataDisplay>h4 {
     font-weight: 400;
     font-size: 14px;
 }
+
 .numberInput {
     font-family: var(--main-font-regular);
     font-size: 16px;
@@ -257,6 +284,7 @@ nav img {
     margin: 5px 0 5px 0;
     border-style: none;
 }
+
 select {
     font-size: 16px;
     font-family: var(--main-font-regular);
@@ -267,6 +295,7 @@ select {
     margin: 5px 0 5px 0;
     border-style: none;
 }
+
 .numberInput:focus {
     outline-color: var(--primary-brand-color);
     outline-width: 3px;
@@ -279,6 +308,7 @@ select {
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
 }
+
 .disabledButton:hover {
     cursor: default;
     scale: none;
@@ -291,11 +321,13 @@ select {
     font-weight: 400;
     margin-top: 16px;
 }
+
 .displayDefaultContent {
     justify-content: center;
     text-align: center;
     align-items: center;
 }
+
 .displayShowData {
     justify-content: flex-start;
     align-items: center;
@@ -311,13 +343,16 @@ select {
     grid-template-columns: 4fr 2fr 2fr;
     grid-auto-rows: auto;
 }
+
 .displayGridTitle {
     margin: 20px 0 30px 0;
 }
+
 .displayGridItem {
     margin: 15px 0 15px 0;
     padding-right: 15px;
 }
+
 .displayResultado {
     display: flex;
     flex-direction: row;
@@ -325,53 +360,64 @@ select {
     width: 100%;
     margin: 30px 0 15px 0;
 }
+
 .displayResultado h3 {
     font-size: 28px;
     font-weight: 600;
     text-decoration: underline;
 }
+
 .displayResultado .destacado {
-    color: var(--primary-brand-color);
+    color: var(--contrast-brand-color);
     text-decoration: none;
 }
 
-.genericForm > .formGrid {
+.genericForm>.formGrid {
     width: 100%;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-auto-rows: auto;
 }
+
 .genericForm .button {
     margin: 10px 0;
 }
+
 .formGrid .dataInputs {
     padding-right: 30px;
     margin-bottom: 20px;
     align-items: center;
 }
-.formGrid .dataInputs > h3 {
+
+.formGrid .dataInputs>h3 {
     margin: 10px 0 4px 0;
-    color: var(--primary-brand-color);
+    color: var(--contrast-brand-color);
     font-weight: 600;
     text-decoration: underline;
 }
+
 .displayCampo {
     margin-top: 30px;
     display: grid;
     align-self: center;
     gap: 6px;
 }
+
 .celdaHectarea {
     width: 30px;
     height: 30px;
+    border-radius: 0.2rem;
+    box-shadow: 5px 5px 5px 0px rgba(10, 10, 10, 0.499);
 }
+
 .gridBotones {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-auto-rows: auto;
     margin-top: 40px;
 }
-.gridBotones > button {
+
+.gridBotones>button {
     margin: 10px 20px;
     display: flex;
     justify-content: center;
@@ -380,39 +426,70 @@ select {
     -webkit-box-shadow: 10px 10px 15px 0px rgba(10, 10, 10, 0.53);
     -moz-box-shadow: 10px 10px 15px 0px rgba(10, 10, 10, 0.53);
 }
-#formSimulador1 > div > button {
+
+#formSimulador1>div>button {
     margin-top: 20px;
-    
+
 }
+
 #formConsultar {
     flex-direction: row;
 }
+
 table {
     margin-top: 30px;
     text-align: left;
     font-size: 18px;
 }
+
 table th {
     padding-left: 20px;
     height: 55px;
 }
+
 table th .propiedad {
     font-weight: 500;
 }
-table th .valorPropiedad{
+
+table th .valorPropiedad {
     font-weight: 300;
 }
-table, th, tr {
+
+table,
+th,
+tr {
     border: 2px, solid;
     border-collapse: collapse;
     border-color: var(--main-text-color);
 }
+
 .center {
     align-self: center;
 }
+
 .centerText {
     text-align: center;
 }
+
 .backButton {
     margin-top: 30px;
+}
+
+/*! Colocar "body" al principio para dar mas especificidad y sobreescribir el estilo default !*/
+
+body .tostadita {
+    font-size: 18px;
+    border-radius: 0.4rem;
+    box-shadow: 10px 10px 11px 0px rgba(0, 0, 0, 0.59);
+    -webkit-box-shadow: 10px 10px 11px 0px rgba(0, 0, 0, 0.59);
+    -moz-box-shadow: 10px 10px 11px 0px rgba(0, 0, 0, 0.59);
+}
+body .exito {
+    background: var(--toast-exito-color);
+}
+body .error {
+    background: var(--toast-error-color);
+}
+body .info {
+    background: var(--toast-info-color);
 }

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simulador | RemoteAgro</title>
     <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
 
 <body>
@@ -189,12 +190,12 @@
     </template>
     <template id="botonesSimulador">
         <div class="gridBotones">
-            <button class="button solidFill buttonMenuConsultar">Consultar hectarea 🔍</button>
-            <button class="button solidFill buttonMenuSimular">Simular paso de un dia 🌞</button>
-            <button class="button solidFill buttonMenuFiltrar">Filtrar hectareas 📋</button>
-            <button class="button solidFill buttonMenuPromedio">Generar promedio 📈</button>
-            <button class="button solidFill buttonMenuGuardar">Guardar progreso ☁</button>
-            <button class="button solidFill buttonMenuReiniciar">Reiniciar simulacion 🔁</button>
+            <button class="button outlineFill buttonMenuConsultar">Consultar hectarea 🔍</button>
+            <button class="button outlineFill buttonMenuSimular">Simular paso de un dia 🌞</button>
+            <button class="button outlineFill buttonMenuFiltrar">Filtrar hectareas 📋</button>
+            <button class="button outlineFill buttonMenuPromedio">Generar promedio 📈</button>
+            <button class="button outlineFill buttonMenuGuardar">Guardar progreso 💾</button>
+            <button class="button outlineFill buttonMenuReiniciar">Reiniciar simulacion 🔁</button>
         </div>
     </template>
     <template id="menuConsultar">
@@ -270,6 +271,8 @@
     <template id="templateBackButton">
         <button class="button solidFill backButton">Volver</button>
     </template>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="../js/tostaditas.js"></script>
     <script src="../js/form.js"> </script>
     <script src="../js/simulador.js"></script>
 </body>

@@ -1,3 +1,5 @@
+
+// Porcentaje de descuento aplicado a un producto por comprar en cantidad mayorista
 const descuentoMayorista = 10
 
 class Producto {
@@ -13,28 +15,13 @@ class Producto {
 
 
 
-// Porcentaje de descuento aplicado al presupuesto total por comprar todas las lineas de productos al por mayor
+// Porcentaje de descuento adicional aplicado al presupuesto total por comprar todas las lineas de productos al por mayor
 const descuentoCompraCompleta = 20;
+
+//! Array con todos los productos (se le debe aplicar JSON.stringify() -> console.log -> copiar y pegar en productos.json -> Format Document)
+
 let productos = [ 
-    new Producto(
-        'Sensor de humedad y temperatura de suelo SoilScan L3',
-        120,
-        18,
-        'hectarea',
-        9
-    ),
-    new Producto(
-        'Pulverizador selectivo con IA SmartWeeds',
-        130,
-        12,
-        'metrosPulverizadora',
-        0.2
-    ),
-    new Producto(
-        'Equipo de seguimiento de cultivo AgrObserve',
-        200,
-        10,
-        'hectarea',
-        4
-    )
+    new Producto('Sensor de humedad y temperatura de suelo SoilScan L3', 120, 18, 'hectareas', 9),
+    new Producto('Pulverizador selectivo con IA SmartWeeds', 130, 12,'metrosPulv', 0.2),
+    new Producto('Equipo de seguimiento de cultivo AgrObserve', 200, 10,'hectareas', 4),
 ]

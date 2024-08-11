@@ -254,6 +254,10 @@ function saveCheck() {
         campo = localSave
         limpiarPantalla()
         menuSimulador()
+        toastExitoCarga()
+    }
+    else {
+        toastErrorCarga()
     }
 }
 
@@ -318,7 +322,8 @@ function menuForm1() {
     })
 
     let buttonCargarProgreso = document.querySelector('.buttonCargarProgreso')
-    buttonCargarProgreso.onclick = () => {
+    buttonCargarProgreso.onclick = (e) => {
+        e.preventDefault()
         saveCheck()
     }
 }
@@ -353,6 +358,7 @@ function form2() {
             campo = new Campo(arrayCampo, anchoCampo, arrayCampo.length)
             limpiarPantalla()
             menuSimulador()
+            toastCampoGenerado()
         }
     })
 }
@@ -386,11 +392,13 @@ function menuSimulador() {
                     break
                 case 'buttonMenuGuardar':
                     localStorage.setItem("campoSave", JSON.stringify(campo))
+                    toastExitoGuardado()
                     break
                 case 'buttonMenuReiniciar':
                     sessionStorage.setItem("lastScreen", 'primerForm')
                     limpiarPantalla()
                     simulador.appendChild(form1.node)
+                    toastReset()
                     break
             }
         })
@@ -519,12 +527,15 @@ function menuSimularDia() {
             switch (opcion) {
                 case '1':
                     campo.recorrerCampo(actualizarCeldaSol);
+                    toastDiaSoleado()
                     break;
                 case '2':
                     campo.recorrerCampo(actualizarCeldaNublado);
+                    toastDiaNublado()
                     break;
                 case '3':
                     campo.recorrerCampo(actualizarCeldaLluvia);
+                    toastDiaLluvia()
                     break;
             }
         }

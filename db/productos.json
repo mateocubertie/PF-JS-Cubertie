@@ -1,0 +1,26 @@
+[
+    {
+        "nombre": "Sensor de humedad y temperatura de suelo SoilScan L3",
+        "precioMinorista": 120,
+        "cantidadMayorista": 18,
+        "medidaAsociada": "hectareas",
+        "cantidadPorMedida": 9,
+        "precioMayorista": 108
+    },
+    {
+        "nombre": "Pulverizador selectivo con IA SmartWeeds",
+        "precioMinorista": 130,
+        "cantidadMayorista": 12,
+        "medidaAsociada": "metrosPulv",
+        "cantidadPorMedida": 0.2,
+        "precioMayorista": 117
+    },
+    {
+        "nombre": "Equipo de seguimiento de cultivo AgrObserve",
+        "precioMinorista": 200,
+        "cantidadMayorista": 10,
+        "medidaAsociada": "hectareas",
+        "cantidadPorMedida": 4,
+        "precioMayorista": 180
+    }
+]

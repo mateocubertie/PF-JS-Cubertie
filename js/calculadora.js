@@ -10,11 +10,9 @@ function displayAddDataRow(display, dataArray) {
 
 let displayFlag = false
 
-function generarPresupuesto(hectareas, pulv, largoPulv) {
+function generarPresupuesto(datosCampo) {
     // Cuenta los productos que se requieren al por mayor
     let cantidadPorMayor = 0;
-
-    let metrosPulv = pulv * largoPulv
 
     let defaultText = display.querySelector('h3')
     if (displayFlag || defaultText) {
@@ -42,15 +40,7 @@ function generarPresupuesto(hectareas, pulv, largoPulv) {
     let precioTotal = 0
 
     productos.forEach((producto) => {
-        let cantidadRequerida
-        switch (producto.medidaPresupuesto) {
-            case 'hectarea':
-                cantidadRequerida = Math.ceil(hectareas * producto.cantidadPorMedida)
-                break;
-            case 'metrosPulverizadora':
-                cantidadRequerida = Math.ceil(metrosPulv * producto.cantidadPorMedida)
-                break;
-        }
+        let cantidadRequerida = Math.ceil(datosCampo[`${producto.medidaAsociada}`] * producto.cantidadPorMedida)
         let totalProducto
         if (cantidadRequerida >= producto.cantidadMayorista) {
             totalProducto = Math.floor(cantidadRequerida * producto.precioMayorista)
@@ -63,7 +53,7 @@ function generarPresupuesto(hectareas, pulv, largoPulv) {
         displayAddDataRow(display, datos)
         precioTotal += totalProducto
     })
-    if (cantidadPorMayor == 3) {
+    if (cantidadPorMayor == productos.length) {
         let alertaDescuento = document.createElement('h4')
         alertaDescuento.textContent = `----- (${descuentoCompraCompleta}% de descuento aplicado si compra todas las lineas al por mayor) -----`
         display.appendChild(alertaDescuento)

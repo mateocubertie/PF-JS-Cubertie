@@ -16,8 +16,16 @@ let form = new Form(document.querySelector('#formPresupuesto'), formInputs)
 form.btnSubmit.addEventListener("click", () => {
     if (!form.submitDisable) {
         let hectareas = parseInt(inputHectareas.value)
-        let pulv = parseInt (inputPulv.value)
+        let pulv = parseInt(inputPulv.value)
         let largoPulv = parseInt(inputLargoPulv.value)
-        generarPresupuesto(hectareas, pulv, largoPulv)
+        let datosCampo = {
+            'hectareas': hectareas,
+            'metrosPulv': pulv * largoPulv
+        }
+        generarPresupuesto(datosCampo)
+        toastPresupuesto()
     }
 })
+
+console.log(JSON.stringify(productos))
+
