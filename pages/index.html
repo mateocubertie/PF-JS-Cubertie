@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RemoteAgro | Su campo en sus manos</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="./index.html"><img src="../images/logo_remoteagro.png" alt=""></a>
+            <ul>
+                <li><a href="./index.html" class="navActive">Inicio</a></li>
+                <li><a href="./simulador.html">Simulador</a></li>
+            </ul>
+        </nav>
+    </header>
+    <section id="main">
+        <div id="mainOverlay">
+            <div>
+                <h1>Todo el control de su campo, <br>al alcance de su mano</h1>
+            </div>
+            <div>
+                <h2>Pruebe hoy el control y la comodidad que le ofrecemos. </h2>
+                <a href="./simulador.html"><button class="button solidFill">Pruebe nuestro simulador
+                        interactivo</button></a>
+                <a href="#calculadoraPresupuesto"><button class="button outlineFill">Obtenga un presupuesto</button></a>
+            </div>
+        </div>
+    </section>
+    <section id="catalogoProductos">
+    </section>
+    <section class="contentSection" id="calculadoraPresupuesto">
+        <h2>Calcule un presupuesto para su campo</h2>
+        <form class="genericForm" id="formPresupuesto">
+            <div class="dataInputs">
+                <div class="formInput">
+                    <h3>Area (en hectáreas) de su campo</h3>
+                    <input id="presHectareas" class="numberInput" type="number" maxlength="4">
+                </div>
+                <div class="formInput">
+                    <h3>Cantidad de pulverizadoras que utiliza</h3>
+                    <input id="presPulv" class="numberInput" type="number" maxlength="4">
+                </div>
+                <div class="formInput">
+                    <h3>Ancho (en metros) de sus pulverizadoras</h3>
+                    <input id="presLargoPulv" class="numberInput" type="number" maxlength="4">
+                </div>
+                <input value="Calcular" class="button solidFill submitButton disabledButton" id="submitPresupuesto"
+                    type="submit">
+            </div>
+            <div class="dataDisplay displayDefaultContent" id="displayPresupuesto">
+                <h3>Ingrese los datos de su campo y <br> calcule un presupuesto en segundos</h3>
+            </div>
+        </form>
+    </section>
+    <script src="../js/productos.js"></script>
+    <script src="../js/calculadora.js"></script>
+    <script src="../js/form.js"></script>
+    <script src="../js/index.js"></script>
+</body>
+
+</html>

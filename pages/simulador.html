@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador | RemoteAgro</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="./index.html"><img src="../images/logo_remoteagro.png" alt=""></a>
+            <ul>
+                <li><a href="./index.html">Inicio</a></li>
+                <li><a href="./simulador.html" class="navActive">Simulador</a></li>
+            </ul>
+        </nav>
+    </header>
+    <section class="contentSection" id="simulador">
+        <h2>Simulador de campo</h2>
+        <form class="genericForm" id="formSimulador1">
+            <div class="dataInputs">
+                <div class="formInput">
+                    <h3>Ancho (en hectáreas) de su campo</h3>
+                    <input id="simAnchoCampo" class="numberInput" type="number" maxlength="4">
+                </div>
+                <div class="formInput">
+                    <h3>Cantidad de cultivos de su campo</h3>
+                    <input id="simCultivos" class="numberInput" type="number" maxlength="4">
+                </div>
+                <div class="formInput">
+                    <h3>Temperatura inicial del suelo</h3>
+                    <select name="rangosTemperatura" id="tempInicial">
+                        <option value="default">Seleccione una temperatura...</option>
+                        <option value="1">Frio (10-15°C)</option>
+                        <option value="2">Templado (15-20°C)</option>
+                        <option value="3">Caliente (20-25°C)</option>
+                    </select>
+                </div>
+                <input value="Continuar" class="button solidFill submitButton disabledButton" id="submitSetupSimulador"
+                    type="submit">
+                <button class="button solidFill buttonCargarProgreso">Cargar progreso local</button>
+            </div>
+        </form>
+    </section>
+
+    <!--! Inputs de datos -->
+
+    <template id="gridFormTemplate">
+        <form class="genericForm">
+            <div class="formGrid">
+            </div>
+            <input value="Continuar" class="button solidFill submitButton disabledButton" type="submit">
+        </form>
+    </template>
+    <template id="gridInputTemplate">
+        <div class="dataInputs">
+        </div>
+    </template>
+    <template id="inputLargoParcela">
+        <div class="formInput">
+            <h3>Largo en hectareas de la parcela</h3>
+            <input type="number" class="numberInput largoParcela">
+        </div>
+    </template>
+    <template id="inputNombreCultivo">
+        <div class="formInput">
+            <h3>Cultivo</h3>
+            <select name="" id="" class="nombreCultivo">
+                <option value="default">Seleccione un cultivo...</option>
+                <option value="papa">Papa 🥔</option>
+                <option value="zanahoria">Zanahoria 🥕</option>
+                <option value="berenjena">Berenjena 🍆</option>
+                <option value="soja">Soja 🌱</option>
+                <option value="acelga">Acelga 🥬</option>
+                <option value="tomate">Tomate 🍅</option>
+                <option value="cebolla">Cebolla 🧅</option>
+                <option value="maiz">Maiz 🌽</option>
+            </select>
+        </div>
+    </template>
+    <template id="inputProgresoInicial">
+        <div class="formInput">
+            <h3>Nivel de crecimiento inicial</h3>
+            <select name="nivelesCrecimientoInicial" class="progresoInicial">
+                <option value="default">Seleccione el progreso inicial...</option>
+                <option value="1">Recien sembrado</option>
+                <option value="2">Menos de un mes de siembra</option>
+                <option value="3">A medio crecer</option>
+                <option value="4">Maduro</option>
+                <option value="5">Cerca de la cosecha</option>
+            </select>
+        </div>
+    </template>
+    <template id="inputHumedadInicial">
+        <div class="formInput">
+            <h3>Humedad de suelo inicial</h3>
+            <select name="nivelesHumedadInicial" class="humedadInicial">
+                <option value="default">Estado de humedad inicial...</option>
+                <option value="1">Seco (0-20%)</option>
+                <option value="2">Normal (20-40%)</option>
+                <option value="3">Humedo (40-60%)</option>
+                <option value="4">Saturado (60-80%+)</option>
+            </select>
+        </div>
+    </template>
+    <template id="inputCultivoFiltro">
+        <div class="formInput">
+            <h3>Cultivo</h3>
+            <select name="" id="nombreCultivo">
+                <option value="undefined">No filtrar por cultivo</option>
+                <option value="papa">Papa 🥔</option>
+                <option value="zanahoria">Zanahoria 🥕</option>
+                <option value="berenjena">Berenjena 🍆</option>
+                <option value="soja">Soja 🌱</option>
+                <option value="acelga">Acelga 🥬</option>
+                <option value="tomate">Tomate 🍅</option>
+                <option value="cebolla">Cebolla 🧅</option>
+                <option value="maiz">Maiz 🌽</option>
+            </select>
+        </div>
+    </template>
+    <template id="inputHumedadFiltro">
+        <div class="formInput">
+            <h3>Humedad de suelo</h3>
+            <select name="nivelesHumedadFiltro" id="humedadFiltro">
+                <option value="undefined">No filtrar por humedad</option>
+                <option value="1">Seco (0-20%)</option>
+                <option value="2">Normal (20-40%)</option>
+                <option value="3">Humedo (40-60%)</option>
+                <option value="4">Saturado (60%+)</option>
+            </select>
+        </div>
+    </template>
+    <template id="inputTemperaturaFiltro">
+        <div class="formInput">
+            <h3>Nivel de temperatura</h3>
+            <select name="nivelesTemperaturaFiltro" id="temperaturaFiltro">
+                <option value="undefined">No filtrar por temperatura</option>
+                <option value="1">Frio (15°C-)</option>
+                <option value="2">Templado (15-20°C)</option>
+                <option value="3">Caliente (20°C+)</option>
+            </select>
+        </div>
+    </template>
+    <template id="inputProgresoFiltro">
+        <div class="formInput">
+            <h3>Nivel de progreso</h3>
+            <select name="nivelesProgresoFiltro" id="progresoFiltro">
+                <option value="undefined">No filtrar por progreso</option>
+                <option value="1">Siembra reciente (0-20%)</option>
+                <option value="2">Cultivos jovenes (20-40%)</option>
+                <option value="3">A medio crecer (40-60%)</option>
+                <option value="4">Cultivos maduros (60-80%)</option>
+                <option value="5">A punto de cosechar (80-99%)</option>
+                <option value="6">Listos para cosechar (100%)</option>
+            </select>
+        </div>
+    </template>
+    <template id="inputFiltrarPromedio">
+        <div class="formInput">
+            <h3>¿Desea filtrar las celdas a promediar?</h3>
+            <select name="filtrosPromedio" id="filtrarPromedio">
+                <option value="default">Seleccione una opcion...</option>
+                <option value="si">Si</option>
+                <option value="no">No</option>
+            </select>
+        </div>
+    </template>
+    <template id="inputTipoFiltro">
+        <div class="formInput">
+            <h3>Determine el tipo de filtro</h3>
+            <select name="tiposFiltro" id="tipoFiltro">
+                <option value="default">Criterio de filtro...</option>
+                <option value="cultivo">Filtrar por cultivo</option>
+                <option value="humedad">Filtrar por humedad de suelo</option>
+                <option value="temperatura">Filtrar por temperatura</option>
+                <option value="crecimiento">Filtrar por grado de crecimiento</option>
+            </select>
+        </div>
+    </template>
+    <template>
+        <div class="formInput">
+            <h3></h3>
+            <select name="" id=""></select>
+        </div>
+    </template>
+    <template id="botonesSimulador">
+        <div class="gridBotones">
+            <button class="button solidFill buttonMenuConsultar">Consultar hectarea 🔍</button>
+            <button class="button solidFill buttonMenuSimular">Simular paso de un dia 🌞</button>
+            <button class="button solidFill buttonMenuFiltrar">Filtrar hectareas 📋</button>
+            <button class="button solidFill buttonMenuPromedio">Generar promedio 📈</button>
+            <button class="button solidFill buttonMenuGuardar">Guardar progreso ☁</button>
+            <button class="button solidFill buttonMenuReiniciar">Reiniciar simulacion 🔁</button>
+        </div>
+    </template>
+    <template id="menuConsultar">
+        <form class="genericForm" id="formConsultar">
+            <div class="dataInputs">
+                <div class="formInput">
+                    <h3>Numero de fila de la hectarea</h3>
+                    <input class="numberInput" type="number" id="inputFilaCelda">
+                </div>
+                <div class="formInput">
+                    <h3>Numero de columna de la hectarea</h3>
+                    <input class="numberInput" type="number" id="inputColumnaCelda">
+                </div>
+                <input value="Consultar celda" type="submit" class="button solidFill submitButton disabledButton">
+                <button class="button solidFill backButton">Volver</button>
+            </div>
+            <div class="dataDisplay center">
+
+            </div>
+        </form>
+    </template>
+    <template id="menuFiltrar">
+        <form class="genericForm" id="formFiltro">
+            <div class="dataInputs">
+                <input value="Generar campo filtrado" type="submit"
+                    class="button solidFill submitButton disabledButton">
+            </div>
+        </form>
+    </template>
+    <template id="menuSimulacion">
+        <form class="genericForm" id="formSimulador">
+            <div class="dataInputs">
+                <div class="formInput">
+                    <h3>Determine el tiempo del dia</h3>
+                    <select name="rangosTemperatura" id="tempInicial">
+                        <option value="default">Seleccione una opcion</option>
+                        <option value="1">Dia soleado</option>
+                        <option value="2">Dia nublado</option>
+                        <option value="3">Dia de lluvia</option>
+                    </select>
+                </div>
+                <input value="Simular paso del dia" class="button solidFill submitButton disabledButton" type="submit">
+                <button class="button solidFill backButton">Volver</button>
+            </div>
+        </form>
+    </template>
+    <template id="menuPromedio">
+        <form class="genericForm displayedForm" id="formPromedio">
+            <div class="dataInputs">
+                <div class="formInput">
+                    <h3>Seleccione el parametro a promediar</h3>
+                    <select name="tiposFiltro" id="parametroPromedio">
+                        <option value="default">Seleccione una opcion</option>
+                        <option value="progreso">Nivel de crecimiento</option>
+                        <option value="temperatura">Temperatura de suelo</option>
+                        <option value="humedad">Humedad de suelo</option>
+                    </select>
+                    <h3>¿Desea filtrar las celdas a promediar?</h3>
+                    <select name="filtrosPromedio" id="filtrarPromedio">
+                        <option value="default">Seleccione una opcion...</option>
+                        <option value="si">Si</option>
+                        <option value="no">No</option>
+                    </select>
+                </div>
+                <input value="Generar promedio" class="button solidFill submitButton disabledButton" type="submit">
+                <button class="button solidFill backButton">Volver</button>
+            </div>
+            <div class="dataDisplay displayResultado center centerText">
+
+            </div>
+        </form>
+    </template>
+    <template id="templateBackButton">
+        <button class="button solidFill backButton">Volver</button>
+    </template>
+    <script src="../js/form.js"> </script>
+    <script src="../js/simulador.js"></script>
+</body>
+
+</html>
