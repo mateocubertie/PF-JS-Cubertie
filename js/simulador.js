@@ -91,6 +91,7 @@ function consultarCelda(campo, fila, columna) {
 
 // Genera las celdas del array del campo (guardado como var. global)
 function inicializarCampo(form2) {
+    arrayCampo = []
     let listaParcelas = form2.node.getElementsByClassName('dataInputs')
     for (let parcela of listaParcelas) {
         let cultivo = formatearString(parcela.querySelector('.nombreCultivo').value)
@@ -248,6 +249,8 @@ function getNodeFromTemplate(templateSelector) {
 
 //! Funciones que modifican el contenido mostrado
 
+
+
 function saveCheck() {
     let localSave = JSON.parse(localStorage.getItem("campoSave"))
     if (localSave) {
@@ -282,11 +285,10 @@ function limpiarPantalla() {
     simulador.innerHTML = `<h2>Simulador de campo</h2>`
 }
 
-function drawGridCampo(campo) {
+function getGridCampo(campo) {
     let gridCampo = document.createElement('div')
-    gridCampo.classList.add('displayCampo')
-    gridCampo.style.gridTemplateColumns = `repeat(${campo.ancho}, auto)`
-    gridCampo.style.gridTemplateRows = `repeat(${campo.filas}, auto)`
+    gridCampo.style.gridTemplateColumns = `repeat(${campo.ancho}, max-content)`
+    gridCampo.style.gridTemplateRows = `repeat(${campo.filas}, max-content)`
     for (let nFila = 0; nFila < campo.filas; nFila++) {
         for (let nColumna = 0; nColumna < campo.ancho; nColumna++) {
             let celda = document.createElement('div')
@@ -295,7 +297,23 @@ function drawGridCampo(campo) {
             gridCampo.appendChild(celda)
         }
     }
-    simulador.appendChild(gridCampo)
+    return gridCampo
+
+}
+
+function centerGrid(gridCampo) {
+    if (gridCampo.clientWidth < gridCampo.scrollWidth) {
+        gridCampo.style.justifyContent = 'flex-start'
+    }
+    else {
+        gridCampo.style.justifyContent = 'center'
+    }
+    if (gridCampo.clientHeight < gridCampo.scrollHeight) {
+        gridCampo.style.alignContent = 'flex-start'
+    }
+    else {
+        gridCampo.style.alignContent = 'center'
+    }
 }
 
 //! Menus
@@ -311,9 +329,6 @@ function menuForm1() {
         e.preventDefault()
         if (!form1.submitDisable) {
             anchoCampo = parseInt(inputAncho.value)
-            if (anchoCampo > 30) {
-                anchoCampo = 30
-            }
             cantidadCultivos = parseInt(inputCantCultivos.value)
             tempInicial = inputTemperatura.value
             limpiarPantalla()
@@ -355,7 +370,11 @@ function form2() {
     form2.btnSubmit.addEventListener("click", () => {
         if (!form2.submitDisable) {
             inicializarCampo(form2)
+            console.log(arrayCampo)
+            console.log(anchoCampo)
+            console.log(arrayCampo.length)
             campo = new Campo(arrayCampo, anchoCampo, arrayCampo.length)
+            console.log('reset?')
             limpiarPantalla()
             menuSimulador()
             toastCampoGenerado()
@@ -365,7 +384,21 @@ function form2() {
 
 function menuSimulador() {
     sessionStorage.setItem("lastScreen", 'simulador')
-    drawGridCampo(campo)
+    let gridCampo = getGridCampo(campo)
+    gridCampo.className = 'gridCampo'
+    let dataContainer = getNodeFromTemplate('#dataContainerSimulador')
+    dataContainer.className = 'simDataContainer'
+    dataContainer.querySelector('.gridWrapper').appendChild(gridCampo)
+    simulador.appendChild(dataContainer)
+    let zoomSlide = simulador.querySelector('.zoomSlide')
+    centerGrid(gridCampo)
+    zoomSlide.addEventListener('input', (e) => {
+        let zoomValue = 1.0 + e.target.value / 100
+        document.documentElement.style.setProperty('--sim-display-zoom', `${zoomValue}`)
+        console.log('cambiaste el slide')
+        centerGrid(gridCampo)
+    })
+
     let gridBotones = document.querySelector('#botonesSimulador').content.cloneNode(true)
     simulador.appendChild(gridBotones)
     let listaBotones = simulador.getElementsByClassName('button')
@@ -398,6 +431,7 @@ function menuSimulador() {
                     sessionStorage.setItem("lastScreen", 'primerForm')
                     limpiarPantalla()
                     simulador.appendChild(form1.node)
+                    console.log(campo)
                     toastReset()
                     break
             }
@@ -500,7 +534,13 @@ function menuFiltrar() {
             }
             campoFiltrado = new Campo(arrayFiltrado, campo.ancho, campo.filas)
             limpiarPantalla()
-            drawGridCampo(campoFiltrado)
+            let gridCampo = getGridCampo(campoFiltrado)
+            gridCampo.className = 'gridCampo'
+            let gridWrapper = getNodeFromTemplate('#dataContainerSimulador').querySelector('.gridWrapper')
+            gridWrapper.appendChild(gridCampo)
+            
+            simulador.appendChild(gridWrapper)
+            centerGrid(gridCampo)
             let backButton = document.querySelector('#templateBackButton').content.cloneNode(true).querySelector('button')
             simulador.appendChild(backButton)
             backButton.addEventListener('click', (e) => {
@@ -592,15 +632,11 @@ function menuPromedio() {
             let campoPromediado = campo
             let display = form.node.querySelector('.dataDisplay')
             if (flagFiltro) {
-                let cultivoFiltro = formatearString(form.node.querySelector('#nombreCultivo').value)
-                let temperaturaFiltro = getFiltroTemperatura(form.node.querySelector('#temperaturaFiltro').value)
-                let humedadFiltro = getFiltroHumedad(form.node.querySelector('#humedadFiltro').value)
-                let progresoFiltro = getFiltroProgreso(form.node.querySelector('#progresoFiltro').value)
                 let celdaFiltro = {
-                    cultivo: cultivoFiltro,
-                    temperatura: temperaturaFiltro,
-                    humedad: humedadFiltro,
-                    progreso: progresoFiltro
+                    cultivo: formatearString(form.node.querySelector('#nombreCultivo').value),
+                    temperatura: getFiltroTemperatura(form.node.querySelector('#temperaturaFiltro').value),
+                    humedad: getFiltroHumedad(form.node.querySelector('#humedadFiltro').value),
+                    progreso: getFiltroProgreso(form.node.querySelector('#progresoFiltro').value)
                 }
                 campoPromediado = filtrarCampo(campo, celdaFiltro)
             }

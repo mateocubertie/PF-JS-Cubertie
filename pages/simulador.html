@@ -48,7 +48,6 @@
     </section>
 
     <!--! Inputs de datos -->
-
     <template id="gridFormTemplate">
         <form class="genericForm">
             <div class="formGrid">
@@ -271,6 +270,17 @@
     <template id="templateBackButton">
         <button class="button solidFill backButton">Volver</button>
     </template>
+    <template id="dataContainerSimulador">
+        <div>
+            <div class="displayContainer">
+                <div class="gridWrapper">
+
+                </div>
+                <input type="range" class="zoomSlide" value = "-50" min="-50" max="50" step="10">
+            </div>
+        </div>
+    </template>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="../js/tostaditas.js"></script>
     <script src="../js/form.js"> </script>
