@@ -1,5 +1,64 @@
 
 
+
+
+
+
+
+
+
+
+//TODO: Con lo que tiene hasta ahora esta para entregar (tendria q hacer q el dashboard sean solo 2 charts
+//TODO: y meterle unos h4 con el titulo del grafico, y comentar y pulir el codigo). Despues de eso, me quedaria,
+//TODO: para farmear mas nota, meter un menu para generar graficos custom o en general meter mas charts (podria
+//TODO: dejar 2 al lado del campo y meter una secc)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //! Funciones de operaciones generales
 
 // Pone una mayuscula al principio del string
@@ -28,6 +87,19 @@ function fitToLimits(num, min, max) {
     }
     return num;
 }
+
+// Redondea el valor de una propiedad (si es numerico) a una cantidad especifica de decimales despues del punto 
+// (borrando los ceros a la derecha que puedan quedar)
+function roundPropertyValue(value) {
+    const decimales = 10
+    if (!isNaN(value)) {
+        return Math.round(value * (10 ** decimales)) / (10 ** decimales)
+    }
+    else {
+        return value
+    }
+}
+
 
 //! Funciones de operaciones con objetos (pendiente: pasarlas a metodos)
 
@@ -110,6 +182,7 @@ function inicializarCampo(form2) {
             arrayCampo.push(fila);
         }
     }
+    campo = new Campo(arrayCampo, anchoCampo, arrayCampo.length)
 }
 
 //! Funciones flecha para actualizar las celdas del simulador
@@ -252,15 +325,17 @@ function getNodeFromTemplate(templateSelector) {
 
 
 function saveCheck() {
-    let localSave = JSON.parse(localStorage.getItem("campoSave"))
-    if (localSave) {
-        campo = localSave
+    let estadoFinalCampo = JSON.parse(localStorage.getItem("estadoFinalCampo"))
+    let datosRecolectados = JSON.parse(localStorage.getItem("datosRecolectados"))
+    if (estadoFinalCampo && datosRecolectados) {
+        campo = estadoFinalCampo
+        datosPorDia = datosRecolectados
         limpiarPantalla()
         menuSimulador()
         toastExitoCarga()
     }
     else {
-        toastErrorCarga()
+        toastErrorCargaLocal()
     }
 }
 
@@ -271,7 +346,8 @@ function checkLastScreen() {
             menuForm1()
             break
         case 'simulador':
-            campo = JSON.parse(localStorage.getItem("campoSave"))
+            campo = JSON.parse(localStorage.getItem("estadoFinalCampo"))
+            datosPorDia = JSON.parse(localStorage.getItem("datosRecolectados"))
             // Reconvierte el campo guardado en localStorage en un objeto de prototipo Campo
             // (el parse devuelve un objeto sin prototipo, y por lo tanto sin metodos asociados)
             Object.setPrototypeOf(campo, new Campo())
@@ -282,6 +358,7 @@ function checkLastScreen() {
 }
 
 function limpiarPantalla() {
+    charts.forEach((chart) => chart.destroy())
     simulador.innerHTML = `<h2>Simulador de campo</h2>`
 }
 
@@ -344,19 +421,19 @@ function menuForm1() {
 }
 
 function form2() {
-    let templateClone = document.querySelector('#gridFormTemplate').content.cloneNode(true)
-    let formElement = templateClone.querySelector('form')
-    let contenedorGrid = templateClone.querySelector('.formGrid')
+    let formElement = getNodeFromTemplate('#gridFormTemplate')
+    let contenedorGrid = formElement.querySelector('.formGrid')
     let formInputs = []
     for (let i = 1; i <= cantidadCultivos; i++) {
-        let inputCard = document.querySelector('#gridInputTemplate').content.cloneNode(true).querySelector('div')
+        let inputCard = getNodeFromTemplate('#gridInputTemplate')
         let tituloParcela = document.createElement('h3')
         tituloParcela.textContent = `Parcela #${i}`
         inputCard.appendChild(tituloParcela)
-        let inputCultivo = document.querySelector('#inputNombreCultivo').content.cloneNode(true).querySelector('.formInput')
-        let inputProgresoInicial = document.querySelector('#inputProgresoInicial').content.cloneNode(true).querySelector('.formInput')
-        let inputHumedadInicial = document.querySelector('#inputHumedadInicial').content.cloneNode(true).querySelector('.formInput')
-        let inputLargo = document.querySelector('#inputLargoParcela').content.cloneNode(true).querySelector('.formInput')
+        let inputCultivo = getNodeFromTemplate('#inputNombreCultivo')
+        let inputProgresoInicial = getNodeFromTemplate('#inputProgresoInicial')
+        let inputHumedadInicial = getNodeFromTemplate('#inputHumedadInicial')
+        let inputLargo = getNodeFromTemplate('#inputLargoParcela')
+        
         let inputList = [inputCultivo, inputProgresoInicial, inputHumedadInicial, inputLargo]
         inputList.forEach((input) => {
             inputCard.appendChild(input)
@@ -370,11 +447,10 @@ function form2() {
     form2.btnSubmit.addEventListener("click", () => {
         if (!form2.submitDisable) {
             inicializarCampo(form2)
-            console.log(arrayCampo)
-            console.log(anchoCampo)
-            console.log(arrayCampo.length)
-            campo = new Campo(arrayCampo, anchoCampo, arrayCampo.length)
-            console.log('reset?')
+            
+            // Guardamos los datos del campo en datosPorDia (lo tenemos que convertir en un JSON string para 
+            // copiar sus valores, ya que los objetos en JS se copian por referencia y no por valor)
+            datosPorDia.push(new DatosDia(`Dia ${dia}`, JSON.stringify(campo)))
             limpiarPantalla()
             menuSimulador()
             toastCampoGenerado()
@@ -382,20 +458,62 @@ function form2() {
     })
 }
 
+function setDisplayZoom(zoomSlider) {
+    let zoomValue = 1.0 + zoomSlider.value / 100
+    document.documentElement.style.setProperty('--sim-display-zoom', `${zoomValue}`)
+}
+
+// Renderiza (dentro del contenedor asignado) un chart del tipo deseado con los datos pasados
+function renderLineChart(chartsArray, dataX, dataY, containerElement, propiedad = '') {
+    var options = {
+        chart: {
+            type: `line`
+        },
+        series: [{
+            name: `${propiedad}`,
+            data: dataY
+        }],
+        xaxis: {
+            categories: dataX
+        }
+    }
+    let chart = new ApexCharts(containerElement, options)
+    chartsArray.push(chart);
+    chart.render();
+}
+
+
 function menuSimulador() {
     sessionStorage.setItem("lastScreen", 'simulador')
     let gridCampo = getGridCampo(campo)
     gridCampo.className = 'gridCampo'
     let dataContainer = getNodeFromTemplate('#dataContainerSimulador')
-    dataContainer.className = 'simDataContainer'
     dataContainer.querySelector('.gridWrapper').appendChild(gridCampo)
+    let dashboardWrapper = getNodeFromTemplate('#templateDashboardWrapper')
+    dataContainer.appendChild(dashboardWrapper)
     simulador.appendChild(dataContainer)
-    let zoomSlide = simulador.querySelector('.zoomSlide')
+
+    let datosX = datosPorDia.map((datosDia) => datosDia.fecha)
+    // Parsea los estados guardados del campo
+    let estadosGuardados = datosPorDia.map((datosDia) => JSON.parse(datosDia.datosCampo))
+    // Los reconvierte a objetos de clase Campo
+    estadosGuardados.forEach((objeto) => {
+        Object.setPrototypeOf(objeto, new Campo())
+    })
+    let arraysEstadosGuardados = estadosGuardados.map((estado) => estado.fusionarArrays())
+    
+    let chart1Node = document.querySelector('#chart1')
+    let chart2Node = document.querySelector('#chart2')
+
+    // Dibujamos los charts
+    renderLineChart(charts, datosX, arraysEstadosGuardados.map((estado) => generarPromedio(estado, 'temperatura')), chart1Node, 'Temperatura')
+    renderLineChart(charts, datosX, arraysEstadosGuardados.map((estado) => generarPromedio(estado, 'humedad')), chart2Node, 'Humedad')
+
+    let zoomSlider = simulador.querySelector('.zoomSlide')
+    setDisplayZoom(zoomSlider)
     centerGrid(gridCampo)
-    zoomSlide.addEventListener('input', (e) => {
-        let zoomValue = 1.0 + e.target.value / 100
-        document.documentElement.style.setProperty('--sim-display-zoom', `${zoomValue}`)
-        console.log('cambiaste el slide')
+    zoomSlider.addEventListener('input', (e) => {
+        setDisplayZoom(e.target)
         centerGrid(gridCampo)
     })
 
@@ -405,6 +523,8 @@ function menuSimulador() {
     for (let boton of listaBotones) {
         boton.addEventListener('click', (event) => {
             let buttonClasses = event.target.classList
+            // Escribimos siempre la clase del boton que representa su accion al final de su lista de clases
+            // Asi que alli buscamos la accion del boton
             let buttonAction = buttonClasses[buttonClasses.length - 1]
             switch (buttonAction) {
                 case 'buttonMenuConsultar':
@@ -424,20 +544,22 @@ function menuSimulador() {
                     menuPromedio()
                     break
                 case 'buttonMenuGuardar':
-                    localStorage.setItem("campoSave", JSON.stringify(campo))
+                    localStorage.setItem("estadoFinalCampo", JSON.stringify(campo))
+                    localStorage.setItem("datosRecolectados", JSON.stringify(datosPorDia))
                     toastExitoGuardado()
                     break
                 case 'buttonMenuReiniciar':
                     sessionStorage.setItem("lastScreen", 'primerForm')
                     limpiarPantalla()
                     simulador.appendChild(form1.node)
-                    console.log(campo)
                     toastReset()
                     break
             }
         })
     }
 }
+
+
 
 function menuConsultar() {
     let menuClone = document.querySelector('#menuConsultar').content.cloneNode(true)
@@ -467,7 +589,7 @@ function menuConsultar() {
                                 ${formatearString(propiedad)}:
                             </th>
                             <th class="valorPropiedad">
-                                ${celda[propiedad]}
+                                ${roundPropertyValue(celda[propiedad])}
                             </th>
                         `
                         tabla.appendChild(fila)
@@ -538,7 +660,7 @@ function menuFiltrar() {
             gridCampo.className = 'gridCampo'
             let gridWrapper = getNodeFromTemplate('#dataContainerSimulador').querySelector('.gridWrapper')
             gridWrapper.appendChild(gridCampo)
-            
+
             simulador.appendChild(gridWrapper)
             centerGrid(gridCampo)
             let backButton = document.querySelector('#templateBackButton').content.cloneNode(true).querySelector('button')
@@ -578,6 +700,7 @@ function menuSimularDia() {
                     toastDiaLluvia()
                     break;
             }
+            datosPorDia.push(new DatosDia(`Dia ${++dia}`, JSON.stringify(campo)))
         }
     })
     simulador.appendChild(formNode)
@@ -680,6 +803,11 @@ class Campo {
             fila.forEach((celda) => funcion(celda))
         })
     }
+    fusionarArrays() {
+        let filasFusionadas = []
+        this.array.forEach((fila) => filasFusionadas = filasFusionadas.concat(fila))
+        return filasFusionadas
+    }
 }
 
 class HectareaCultivo {
@@ -691,6 +819,13 @@ class HectareaCultivo {
         this.temperatura = temperatura;
         this.progreso = progreso;
         this.color = coloresCultivos(cultivo)
+    }
+}
+
+class DatosDia {
+    constructor(fecha, datosCampo) {
+        this.fecha = fecha
+        this.datosCampo = datosCampo
     }
 }
 
@@ -713,6 +848,11 @@ let campo
 // Objeto global para el formulario que se muestra por default 
 let form1
 
+// Array global en que se guardan los datos del campo por dia
+let datosPorDia = []
+let dia = 0
+
+let charts = []
 menuForm1()
 
 checkLastScreen()

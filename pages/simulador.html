@@ -12,9 +12,9 @@
 <body>
     <header>
         <nav>
-            <a href="./index.html"><img src="../images/logo_remoteagro.png" alt=""></a>
+            <a href="../index.html"><img src="../images/logo_remoteagro.png" alt=""></a>
             <ul>
-                <li><a href="./index.html">Inicio</a></li>
+                <li><a href="../index.html">Inicio</a></li>
                 <li><a href="./simulador.html" class="navActive">Simulador</a></li>
             </ul>
         </nav>
@@ -271,13 +271,25 @@
         <button class="button solidFill backButton">Volver</button>
     </template>
     <template id="dataContainerSimulador">
-        <div>
+        <div class="simDataContainer">
             <div class="displayContainer">
                 <div class="gridWrapper">
 
                 </div>
                 <input type="range" class="zoomSlide" value = "-50" min="-50" max="50" step="10">
             </div>
+        </div>
+    </template>
+    <template id="templateDashboardWrapper">
+        <div class="dashboardWrapper">
+            <div class="dashboardChart" id="chart1">
+
+            </div>
+
+            <div class="dashboardChart" id="chart2">
+
+            </div>
+
         </div>
     </template>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>

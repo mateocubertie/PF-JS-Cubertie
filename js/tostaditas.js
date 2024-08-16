@@ -1,5 +1,5 @@
 
-function toastPresupuesto() {
+function toastPresupuestoGenerado() {
     Toastify({
         text: "Presupuesto generado ✅",
         duration: 3500,
@@ -7,6 +7,17 @@ function toastPresupuesto() {
         position: "right", 
         stopOnFocus: true,
         className: "tostadita exito",
+    }).showToast();
+}
+
+function toastErrorCargaProductos() {
+    Toastify({
+        text: "Falló la conexión con la base de datos ⚠",
+        duration: 3500,
+        gravity: "bottom", 
+        position: "right", 
+        stopOnFocus: true,
+        className: "tostadita error",
     }).showToast();
 }
 
@@ -21,7 +32,7 @@ function toastExitoCarga() {
     }).showToast();
 }
 
-function toastErrorCarga() {
+function toastErrorCargaLocal() {
     Toastify({
         text: "No hay datos guardados ⚠",
         duration: 3500,

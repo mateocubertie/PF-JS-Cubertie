@@ -23,7 +23,7 @@ form.btnSubmit.addEventListener("click", () => {
             'metrosPulv': pulv * largoPulv
         }
         generarPresupuesto(datosCampo)
-        toastPresupuesto()
+        
     }
 })
 

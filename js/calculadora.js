@@ -8,12 +8,10 @@ function displayAddDataRow(display, dataArray) {
     })
 }
 
-let displayFlag = false
-
 function generarPresupuesto(datosCampo) {
     // Cuenta los productos que se requieren al por mayor
     let cantidadPorMayor = 0;
-
+    
     let defaultText = display.querySelector('h3')
     if (displayFlag || defaultText) {
         display.innerHTML = ""
@@ -21,6 +19,15 @@ function generarPresupuesto(datosCampo) {
         display.classList.add('displayShowData')
     }
 
+    if (requestFail) {
+        let errorAlert = document.createElement('h3')
+        errorAlert.innerHTML = "Error al cargar la base de datos de productos <br> (Utilice Live Server para ejecutar de forma local)"
+        errorAlert.style.justifySelf = 'center'
+        errorAlert.style.textAlign = 'center'
+        display.appendChild(errorAlert)
+        toastErrorCargaProductos()
+        return
+    }
     let displayTitle = document.createElement('h3')
     displayTitle.textContent = "Usted requiere para su campo de:"
     display.appendChild(displayTitle)
@@ -70,4 +77,16 @@ function generarPresupuesto(datosCampo) {
 
     display.appendChild(divTotal)
     displayFlag = true
+    toastPresupuestoGenerado()
 }
+
+//! Programa principal
+
+let displayFlag = false
+let requestFail = false
+
+fetch('./db/productos.json')
+.then((response) => response.json())
+.then((datos) => {productos = datos})
+.catch(() => { requestFail = true; console.log('error') })
+
