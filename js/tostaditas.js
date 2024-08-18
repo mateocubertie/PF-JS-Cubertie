@@ -1,4 +1,4 @@
-
+// Notificaciones/alertas creadas con toastify.js
 function toastPresupuestoGenerado() {
     Toastify({
         text: "Presupuesto generado ✅",

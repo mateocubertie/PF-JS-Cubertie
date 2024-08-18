@@ -1,15 +1,17 @@
+// Clase de objeto con la que controlamos las entradas de datos, los botones y las acciones de los formularios/menus
 class Form {
+    // Constructor
     constructor(node, inputs) {
         this.node = node
         this.btnSubmit = node.querySelector('.submitButton')
         this.inputs = inputs
         this.submitDisable = true
-
         this.btnSubmit.addEventListener("click", (e)=> {
             e.preventDefault()
         })
         this.inicializarInputs()
     }
+    // Funcion que chequea si se debe habilitar el boton de submit
     formCheckSubmit() {
         this.submitDisable = false
         for (let input of this.inputs) {
@@ -24,6 +26,8 @@ class Form {
             this.btnSubmit.classList.remove('disabledButton')
         }
     }
+    // Funcion que inicializa las entradas de datos del formulario, agregando eventListeners que 
+    // detecten el ingreso de datos y habiliten o deshabiliten el boton de submit
     inicializarInputs() {
         for (let input of this.inputs) {
             if (input.value == "" || input.value == 'default') {
@@ -55,7 +59,7 @@ class Form {
         this.formCheckSubmit()
     }
 }
-
+// Genera un texto sobre el input que alerta al usuario de que ingreso un dato inválido
 function formShowInputAlert(inputElement, alertMessage) {
     let parentNode = inputElement.parentNode
     let alertElement = document.createElement('h4')
@@ -63,7 +67,7 @@ function formShowInputAlert(inputElement, alertMessage) {
     alertElement.classList.add('inputAlert')
     parentNode.insertBefore(alertElement, parentNode.querySelector('input'))
 }
-
+// Chequea que el dato ingresado en un input sea un numero positivo
 function formNumberCheck(inputElement) {
     let inputValue = parseInt(inputElement.value)
     let alertElement = inputElement.parentNode.querySelector('.inputAlert')

@@ -1,63 +1,48 @@
+//! Clases y sus metodos
 
+// Objeto que representa el campo
+class Campo {
+    // Constructor
+    constructor(array, ancho, filas) {
+        this.array = array
+        this.ancho = ancho
+        this.filas = filas
+    }
+    // Recorre cada celda del campo aplicando la funcion pasada
+    recorrerCampo(funcion) {
+        this.array.forEach((fila) => {
+            fila.forEach((celda) => funcion(celda))
+        })
+    }
+    // Fusiona todas las filas del campo en un solo array y lo devuelve
+    fusionarArrays() {
+        let filasFusionadas = []
+        this.array.forEach((fila) => filasFusionadas = filasFusionadas.concat(fila))
+        return filasFusionadas
+    }
+}
 
+// Objeto que representa cada hectarea (celda) del campo
+class HectareaCultivo {
+    // Constructor
+    constructor(id, cultivo, humedad, temperatura, progreso) {
+        this.id = id;
+        this.cultivo = cultivo;
+        this.humedad = humedad;
+        this.temperatura = temperatura;
+        this.progreso = progreso;
+        this.color = coloresCultivos(cultivo)
+    }
+}
 
-
-
-
-
-
-
-
-//TODO: Con lo que tiene hasta ahora esta para entregar (tendria q hacer q el dashboard sean solo 2 charts
-//TODO: y meterle unos h4 con el titulo del grafico, y comentar y pulir el codigo). Despues de eso, me quedaria,
-//TODO: para farmear mas nota, meter un menu para generar graficos custom o en general meter mas charts (podria
-//TODO: dejar 2 al lado del campo y meter una secc)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// Objeto que representa un estado del campo en un cierto dia (fecha + copia en formato JSON string del objeto Campo)
+class DatosDia {
+    // Constructor
+    constructor(fecha, datosCampo) {
+        this.fecha = fecha
+        this.datosCampo = datosCampo
+    }
+}
 
 //! Funciones de operaciones generales
 
@@ -90,8 +75,7 @@ function fitToLimits(num, min, max) {
 
 // Redondea el valor de una propiedad (si es numerico) a una cantidad especifica de decimales despues del punto 
 // (borrando los ceros a la derecha que puedan quedar)
-function roundPropertyValue(value) {
-    const decimales = 10
+function roundPropertyValue(value, decimales) {
     if (!isNaN(value)) {
         return Math.round(value * (10 ** decimales)) / (10 ** decimales)
     }
@@ -103,6 +87,7 @@ function roundPropertyValue(value) {
 
 //! Funciones de operaciones con objetos (pendiente: pasarlas a metodos)
 
+// Devuelve un array con todas las celdas del campo cuyas propiedades coinciden con las de la celda "filtro" pasada
 function filtrarCampo(campo, celdaFiltro) {
     let campoFiltrado = []
     campo.array.forEach((fila) => {
@@ -121,24 +106,28 @@ function chequearLimitesCelda(celda) {
     celda.progreso = fitToLimits(celda.progreso, 0, 100);
 }
 
+// Genera el promedio de la propiedad solicitada a partir del array (unidimensional) de celdas pasado
 function generarPromedio(campoFiltrado, propiedad) {
     let sumaTotal = campoFiltrado.reduce((accumulator, celda) => accumulator + celda[`${propiedad}`], 0)
-    let digitosDecimales = 2
-    const redondeoDecimal = Math.pow(10, digitosDecimales)
-    let promedio = Math.round((sumaTotal / campoFiltrado.length) * redondeoDecimal) / redondeoDecimal
-    return promedio
+    let promedio = (sumaTotal / campoFiltrado.length)
+    return roundPropertyValue(promedio, 2)
 }
 
+// Compara una celda del campo con un filtro dado 
 function compararCelda(celda, celdaFiltro) {
     for (let propiedad in celdaFiltro) {
         let valorFiltro = celdaFiltro[`${propiedad}`];
+        // Si la propiedad comparada tiene valor 'undefined' en el filtro, la ignoramos
         if (valorFiltro !== 'undefined' && valorFiltro !== 'Undefined') {
             let valorPropiedad = celda[`${propiedad}`];
+            // Si la propiedad comparada es el nombre del cultivo, buscamos una coincidencia exacta
             if (propiedad == 'cultivo') {
                 if (valorPropiedad !== valorFiltro) {
                     return false;
                 }
             }
+            // Si la propiedad es numerica, asignamos el valor que toma en cada celda a un determinado rango, y buscamos 
+            // que este coincida en ambas
             else {
                 let min = valorFiltro[0];
                 let max = valorFiltro[1];
@@ -150,12 +139,16 @@ function compararCelda(celda, celdaFiltro) {
     }
     return true;
 }
+
+// 
 function consultarCelda(campo, fila, columna) {
     let arrayFila = campo.array[fila]
     if (arrayFila) {
         let celda = (campo.array[fila])[columna]
+        // Si no existe celda con ese numero dentro de la fila, devolvemos null (creo que ya lo hace por default)
         return celda ?? null
     }
+    // Si no existe la fila, devolvemos null (creo que ya lo hace por default)
     else {
         return null
     }
@@ -164,24 +157,29 @@ function consultarCelda(campo, fila, columna) {
 // Genera las celdas del array del campo (guardado como var. global)
 function inicializarCampo(form2) {
     arrayCampo = []
+    let nFilasPrev = 0
     let listaParcelas = form2.node.getElementsByClassName('dataInputs')
+    // Por cada parcela de cultivo, leemos los valores ingresados en el form
     for (let parcela of listaParcelas) {
         let cultivo = formatearString(parcela.querySelector('.nombreCultivo').value)
         let progresoInicial = parcela.querySelector('.progresoInicial').value
         let humedadInicial = parcela.querySelector('.humedadInicial').value
         let largo = parseInt(parcela.querySelector('.largoParcela').value)
+        // For que construye las celdas del campo
         for (let nFila = 0; nFila < largo; nFila++) {
             let fila = [];
             // For que recorre cada celda de la fila
             for (let nColumna = 0; nColumna < anchoCampo; nColumna++) {
                 // Genera un id de la forma '(fila;columna)'
-                let id = `${nFila};${nColumna}`;
+                let id = `${nFila+nFilasPrev};${nColumna}`;
                 let celda = new HectareaCultivo(id, cultivo, setHumedadInicial(humedadInicial), setTemperaturaInicial(tempInicial), setProgresoInicial(progresoInicial));
                 fila.push(celda);
             }
             arrayCampo.push(fila);
         }
+        nFilasPrev += largo
     }
+    // Construimos el campo
     campo = new Campo(arrayCampo, anchoCampo, arrayCampo.length)
 }
 
@@ -316,20 +314,24 @@ function getFiltroProgreso(opcion) {
 
 //! Funciones que operan con objetos del DOM
 
+// Devuelve el primer elemento dentro de la template pasada (el id debe incluir el '#')
 function getNodeFromTemplate(templateSelector) {
     return document.querySelector(`${templateSelector}`).content.cloneNode(true).children.item(0)
 }
 
 //! Funciones que modifican el contenido mostrado
 
-
-
+// Chequea si hay datos guardados en el localStorage
 function saveCheck() {
     let estadoFinalCampo = JSON.parse(localStorage.getItem("estadoFinalCampo"))
     let datosRecolectados = JSON.parse(localStorage.getItem("datosRecolectados"))
     if (estadoFinalCampo && datosRecolectados) {
         campo = estadoFinalCampo
+        // Le asignamos de vuelta la clase Campo al objeto campo (ya que JSON.parse() lo devuelve sin la clase original)
+        Object.setPrototypeOf(campo, new Campo())
         datosPorDia = datosRecolectados
+        // Busca el ultimo numero de dia en la fecha del ultimo elemento del array datosPorDia
+        dia = datosPorDia.slice(-1)[0].fecha
         limpiarPantalla()
         menuSimulador()
         toastExitoCarga()
@@ -339,6 +341,7 @@ function saveCheck() {
     }
 }
 
+// Chequea cual fue el ultimo menu de simulador.html visitado por el usuario
 function checkLastScreen() {
     let lastScreen = sessionStorage.getItem("lastScreen") ?? 'primerForm'
     switch (lastScreen) {
@@ -346,26 +349,29 @@ function checkLastScreen() {
             menuForm1()
             break
         case 'simulador':
-            campo = JSON.parse(localStorage.getItem("estadoFinalCampo"))
-            datosPorDia = JSON.parse(localStorage.getItem("datosRecolectados"))
-            // Reconvierte el campo guardado en localStorage en un objeto de prototipo Campo
-            // (el parse devuelve un objeto sin prototipo, y por lo tanto sin metodos asociados)
-            Object.setPrototypeOf(campo, new Campo())
-            limpiarPantalla()
-            menuSimulador()
+            saveCheck()
             break
     }
 }
 
+// Limpia la pantalla del simulador
 function limpiarPantalla() {
-    charts.forEach((chart) => chart.destroy())
+    charts.forEach((chart) => {
+        // Destruye todos los charts dibujados
+        chart.destroy()
+    })
+    // Vacía el array de charts dibujados en pantalla
+    charts.length = 0
     simulador.innerHTML = `<h2>Simulador de campo</h2>`
 }
 
+// Devuelve una grid (en forma de div) con las celdas del campo dibujadas 
 function getGridCampo(campo) {
     let gridCampo = document.createElement('div')
+    // Determina la cantidad de filas y columnas de la grid segun las filas y el ancho del campo
     gridCampo.style.gridTemplateColumns = `repeat(${campo.ancho}, max-content)`
     gridCampo.style.gridTemplateRows = `repeat(${campo.filas}, max-content)`
+    // Loop que mete cada celda del campo dentro de la grid y le da la clase correspondiente para que se le apliquen estilos
     for (let nFila = 0; nFila < campo.filas; nFila++) {
         for (let nColumna = 0; nColumna < campo.ancho; nColumna++) {
             let celda = document.createElement('div')
@@ -375,9 +381,10 @@ function getGridCampo(campo) {
         }
     }
     return gridCampo
-
 }
 
+// Centra la grid del campo dibujada en la pantalla del simulador (si no overflowea su wrapper, ya que en ese caso
+// debe colocarse al principio del wrapper para poder scrollear por todo su contenido)
 function centerGrid(gridCampo) {
     if (gridCampo.clientWidth < gridCampo.scrollWidth) {
         gridCampo.style.justifyContent = 'flex-start'
@@ -393,26 +400,73 @@ function centerGrid(gridCampo) {
     }
 }
 
+// Cambia la variable de styles.css con la que se calcula el tamaño de ciertos elementos zoomeables (grid dibujada del campo)
+function setDisplayZoom(zoomSlider) {
+    let zoomValue = 1.0 + zoomSlider.value / 100
+    document.documentElement.style.setProperty('--sim-display-zoom', `${zoomValue}`)
+}
+
+// Renderiza (dentro del contenedor asignado) un chart del tipo deseado con los datos pasados (de la libreria ApexCharts.js)
+function renderLineChart(chartsArray, dataX, dataY, containerElement, propiedad = '', unidadX, unidadY, titulo) {
+    var options = {
+        chart: {
+            type: `line`,
+            foreColor: '#AAAAAA'
+        },
+        series: [{
+            name: `${propiedad}`,
+            data: dataY
+        }],
+        xaxis: {
+            labels: {
+                formatter: (categoria) => `${unidadX} ${categoria}`
+            },
+            categories: dataX
+        },
+        yaxis: {
+            labels: {
+                formatter: (dato) => `${dato}${unidadY}`
+            }
+        },
+        title: {
+            text: `${titulo}`,
+            style: {
+                color: 'var(--main-text-color)',
+                fontSize: '18px',
+                fontWeight: '400',
+                textAlign: 'center',
+                fontFamily: 'var(--main-font-regular)',
+            }
+        }
+    }
+    let chart = new ApexCharts(containerElement, options)
+    chartsArray.push(chart);
+    chart.render();
+}
+
 //! Menus
 
+// Menu del primer formulario
 function menuForm1() {
-    let inputAncho = document.querySelector('#simAnchoCampo')
-    let inputCantCultivos = document.querySelector('#simCultivos')
-    let inputTemperatura = document.querySelector('#tempInicial')
-    let formInputs = [inputAncho, inputCantCultivos, inputTemperatura]
-
+    // Mete en un array todos los inputs y selects del formulario
+    let formInputs = Array.from(document.getElementsByClassName("formInput"))
+    formInputs = formInputs.map((div) => {
+        return div.querySelector('input') ?? div.querySelector('select')
+    })
+    // Construye el Form
     form1 = new Form(document.querySelector('#formSimulador1'), formInputs)
+    // Acción del boton "continuar"/submit
     form1.btnSubmit.addEventListener("click", (e) => {
         e.preventDefault()
         if (!form1.submitDisable) {
-            anchoCampo = parseInt(inputAncho.value)
-            cantidadCultivos = parseInt(inputCantCultivos.value)
-            tempInicial = inputTemperatura.value
+            anchoCampo = parseInt(document.querySelector('#simAnchoCampo').value)
+            cantidadCultivos = parseInt(document.querySelector('#simCultivos').value)
+            tempInicial = document.querySelector('#tempInicial').value
             limpiarPantalla()
-            form2()
+            menuForm2()
         }
     })
-
+    // Accion del boton "cargar progreso local"
     let buttonCargarProgreso = document.querySelector('.buttonCargarProgreso')
     buttonCargarProgreso.onclick = (e) => {
         e.preventDefault()
@@ -420,21 +474,26 @@ function menuForm1() {
     }
 }
 
-function form2() {
+// Menu del segundo formulario (cantidad variable de inputs segun las cantidad de cultivos/parcelas)
+function menuForm2() {
+    // Obtiene los nodos de la template del formulario
     let formElement = getNodeFromTemplate('#gridFormTemplate')
     let contenedorGrid = formElement.querySelector('.formGrid')
     let formInputs = []
+    // For que agrega cada input de cada parcela a la lista de inputs del formulario
     for (let i = 1; i <= cantidadCultivos; i++) {
         let inputCard = getNodeFromTemplate('#gridInputTemplate')
         let tituloParcela = document.createElement('h3')
         tituloParcela.textContent = `Parcela #${i}`
         inputCard.appendChild(tituloParcela)
-        let inputCultivo = getNodeFromTemplate('#inputNombreCultivo')
-        let inputProgresoInicial = getNodeFromTemplate('#inputProgresoInicial')
-        let inputHumedadInicial = getNodeFromTemplate('#inputHumedadInicial')
-        let inputLargo = getNodeFromTemplate('#inputLargoParcela')
-        
-        let inputList = [inputCultivo, inputProgresoInicial, inputHumedadInicial, inputLargo]
+        // Obtiene los nodos de cada input de cada parcela
+        let inputList = [
+            getNodeFromTemplate('#inputNombreCultivo'),
+            getNodeFromTemplate('#inputProgresoInicial'),
+            getNodeFromTemplate('#inputHumedadInicial'),
+            getNodeFromTemplate('#inputLargoParcela')
+        ]
+        //
         inputList.forEach((input) => {
             inputCard.appendChild(input)
             formInputs.push(input.querySelector('input') ?? input.querySelector('select'))
@@ -443,14 +502,13 @@ function form2() {
     }
     simulador.appendChild(formElement)
     let form2 = new Form(formElement, formInputs)
-
+    // Acción del boton de submit
     form2.btnSubmit.addEventListener("click", () => {
         if (!form2.submitDisable) {
             inicializarCampo(form2)
-            
             // Guardamos los datos del campo en datosPorDia (lo tenemos que convertir en un JSON string para 
             // copiar sus valores, ya que los objetos en JS se copian por referencia y no por valor)
-            datosPorDia.push(new DatosDia(`Dia ${dia}`, JSON.stringify(campo)))
+            datosPorDia.push(new DatosDia(dia, JSON.stringify(campo)))
             limpiarPantalla()
             menuSimulador()
             toastCampoGenerado()
@@ -458,41 +516,22 @@ function form2() {
     })
 }
 
-function setDisplayZoom(zoomSlider) {
-    let zoomValue = 1.0 + zoomSlider.value / 100
-    document.documentElement.style.setProperty('--sim-display-zoom', `${zoomValue}`)
-}
-
-// Renderiza (dentro del contenedor asignado) un chart del tipo deseado con los datos pasados
-function renderLineChart(chartsArray, dataX, dataY, containerElement, propiedad = '') {
-    var options = {
-        chart: {
-            type: `line`
-        },
-        series: [{
-            name: `${propiedad}`,
-            data: dataY
-        }],
-        xaxis: {
-            categories: dataX
-        }
-    }
-    let chart = new ApexCharts(containerElement, options)
-    chartsArray.push(chart);
-    chart.render();
-}
-
-
+// Menu principal del simulador
 function menuSimulador() {
+    // Cambia la ultima pantalla visitada por el usuario (guardada en sessionStorage) al simulador 
     sessionStorage.setItem("lastScreen", 'simulador')
+    // Obtiene la grid del campo
     let gridCampo = getGridCampo(campo)
     gridCampo.className = 'gridCampo'
+    // Obtiene el div de los datos mostrados de su template
     let dataContainer = getNodeFromTemplate('#dataContainerSimulador')
+    // Mete la grid del campo dentro del gridWrapper
     dataContainer.querySelector('.gridWrapper').appendChild(gridCampo)
+    // Obtiene el wrapper que contiene la dashboard
     let dashboardWrapper = getNodeFromTemplate('#templateDashboardWrapper')
     dataContainer.appendChild(dashboardWrapper)
     simulador.appendChild(dataContainer)
-
+    // Define como datos del eje X de los charts a un array con los nros. de dias pasados
     let datosX = datosPorDia.map((datosDia) => datosDia.fecha)
     // Parsea los estados guardados del campo
     let estadosGuardados = datosPorDia.map((datosDia) => JSON.parse(datosDia.datosCampo))
@@ -500,26 +539,32 @@ function menuSimulador() {
     estadosGuardados.forEach((objeto) => {
         Object.setPrototypeOf(objeto, new Campo())
     })
+    // Crea un array con los estados guardados del campo simplificados a una fila sola
     let arraysEstadosGuardados = estadosGuardados.map((estado) => estado.fusionarArrays())
-    
+    // Obtiene los nodos en que van los charts
     let chart1Node = document.querySelector('#chart1')
     let chart2Node = document.querySelector('#chart2')
-
     // Dibujamos los charts
-    renderLineChart(charts, datosX, arraysEstadosGuardados.map((estado) => generarPromedio(estado, 'temperatura')), chart1Node, 'Temperatura')
-    renderLineChart(charts, datosX, arraysEstadosGuardados.map((estado) => generarPromedio(estado, 'humedad')), chart2Node, 'Humedad')
-
+    renderLineChart(charts, datosX, arraysEstadosGuardados.map((estado) => generarPromedio(estado, 'temperatura')), chart1Node, 'Temperatura', 'Dia', '°C', 'Temperatura promedio del campo')
+    renderLineChart(charts, datosX, arraysEstadosGuardados.map((estado) => generarPromedio(estado, 'humedad')), chart2Node, 'Humedad', 'Dia', '%', 'Humedad promedio del campo')
+    console.log(charts[0])
+    // Obtiene el slider que determina el zoom
     let zoomSlider = simulador.querySelector('.zoomSlide')
+    // Inicia con el zoom en su valor por defecto
     setDisplayZoom(zoomSlider)
+    // Centra la grid del campo
     centerGrid(gridCampo)
+    // Funcion a llamar cuando el usuario mueve el slider
     zoomSlider.addEventListener('input', (e) => {
         setDisplayZoom(e.target)
         centerGrid(gridCampo)
     })
-
-    let gridBotones = document.querySelector('#botonesSimulador').content.cloneNode(true)
+    // Crea e inserta en el simulador la grid con los botones
+    let gridBotones = getNodeFromTemplate('#botonesSimulador')
     simulador.appendChild(gridBotones)
+    // Crea un array con la lista de botones
     let listaBotones = simulador.getElementsByClassName('button')
+    // Añade a cada boton un evento onclick que determina la accion a realizar
     for (let boton of listaBotones) {
         boton.addEventListener('click', (event) => {
             let buttonClasses = event.target.classList
@@ -544,13 +589,17 @@ function menuSimulador() {
                     menuPromedio()
                     break
                 case 'buttonMenuGuardar':
+                    // Guardamos los datos recolectados del campo y su estado final en localStorage
                     localStorage.setItem("estadoFinalCampo", JSON.stringify(campo))
                     localStorage.setItem("datosRecolectados", JSON.stringify(datosPorDia))
                     toastExitoGuardado()
                     break
                 case 'buttonMenuReiniciar':
                     sessionStorage.setItem("lastScreen", 'primerForm')
+                    // Vacía el array de datos almacenados
+                    datosPorDia.length = 0
                     limpiarPantalla()
+                    // Muestra el primer formulario
                     simulador.appendChild(form1.node)
                     toastReset()
                     break
@@ -559,28 +608,37 @@ function menuSimulador() {
     }
 }
 
-
-
+// Menu para consultar una celda del campo
 function menuConsultar() {
-    let menuClone = document.querySelector('#menuConsultar').content.cloneNode(true)
-    let formNode = menuClone.querySelector('.genericForm')
+    // Obtiene el formulario del menu de su template
+    let formNode = getNodeFromTemplate('#menuConsultar')
     let inputs = []
+    // Mete en el array inputs todas las inputs del form
     for (let input of formNode.getElementsByTagName('input')) {
         if (input.getAttribute('type') != 'submit') {
             inputs.push(input)
         }
     }
+    // Inicializa el form
     let form = new Form(formNode, inputs)
+    // Mete el form en la pantalla del simulador
     simulador.appendChild(formNode)
     let display = form.node.querySelector('.dataDisplay')
+    // Accion del boton de submit (consulta)
     form.btnSubmit.addEventListener('click', () => {
         if (!form.submitDisable) {
+            // Vacia el display del resultado
             display.innerHTML = ""
+            // Parsea la fila y la columna de las inputs
             let fila = parseInt(form.node.querySelector('#inputFilaCelda').value)
             let columna = parseInt(form.node.querySelector('#inputColumnaCelda').value)
+            // Consulta la celda
             let celda = consultarCelda(campo, fila, columna)
+            // Si existe la celda, creamos una tabla para mostrar cada una de sus propiedades
             if (celda != null) {
+                // Crea una tabla
                 let tabla = document.createElement('table')
+                // Recorre cada propiedad de la celda y añade una fila a la tabla con el nombre y valor de esta
                 for (let propiedad in celda) {
                     if (propiedad != 'color') {
                         let fila = document.createElement('tr')
@@ -589,7 +647,7 @@ function menuConsultar() {
                                 ${formatearString(propiedad)}:
                             </th>
                             <th class="valorPropiedad">
-                                ${roundPropertyValue(celda[propiedad])}
+                                ${roundPropertyValue(celda[propiedad], 2)}
                             </th>
                         `
                         tabla.appendChild(fila)
@@ -597,56 +655,70 @@ function menuConsultar() {
                 }
                 display.appendChild(tabla)
             }
+            // Si no existe la celda, lo informamos con un h3
             else {
                 display.innerHTML = '<h3 class="centerText">No existe la celda buscada</h3>'
             }
         }
     })
+    // Accion del boton "volver"
     form.node.querySelector('.backButton').addEventListener("click", () => {
         limpiarPantalla()
         menuSimulador()
     })
 }
 
+// Menu para filtar el campo
 function menuFiltrar() {
     let campoFiltrado
-    let menuClone = document.querySelector('#menuFiltrar').content.cloneNode(true)
-    let formNode = menuClone.querySelector('.genericForm')
+    // Obtiene el nodo del menu de su template
+    let formNode = getNodeFromTemplate('#menuFiltrar')
+    // Nodo en que se insertan los inputs
     let dataInputs = formNode.querySelector('.dataInputs')
-    let formCultivo = document.querySelector("#inputCultivoFiltro").content.cloneNode(true).querySelector('.formInput')
-    let formTemperatura = document.querySelector("#inputTemperaturaFiltro").content.cloneNode(true).querySelector('.formInput')
-    let formHumedad = document.querySelector("#inputHumedadFiltro").content.cloneNode(true).querySelector('.formInput')
-    let formProgreso = document.querySelector("#inputProgresoFiltro").content.cloneNode(true).querySelector('.formInput')
-    let formsFiltros = [formTemperatura, formHumedad, formProgreso, formCultivo]
+    let formsFiltros = [ 
+        getNodeFromTemplate("#inputCultivoFiltro"),
+        getNodeFromTemplate("#inputTemperaturaFiltro"),
+        getNodeFromTemplate("#inputHumedadFiltro"),
+        getNodeFromTemplate("#inputProgresoFiltro")
+    ]
     let inputs = []
+    // Loop que añade cada filtro a la lista de inputs y lo inserta en el nodo dataInputs
     for (filtro of formsFiltros) {
         dataInputs.prepend(filtro)
         inputs.push(filtro.querySelector('select'))
     }
+    // Inicializa el Form
     let form = new Form(formNode, inputs)
+    // Dado que la opción por defecto de los filtros es "No filtrar por X", habilitamos el boton de submit
     form.submitDisable = false
     form.formCheckSubmit
+    // Insertamos el form en el simulador
     simulador.appendChild(form.node)
+    // Accion del boton de submit
     form.btnSubmit.addEventListener('click', () => {
         if (!form.submitDisable) {
-            let cultivoFiltro = formatearString(formCultivo.querySelector('select').value)
-            let temperaturaFiltro = getFiltroTemperatura(formTemperatura.querySelector('select').value)
-            let humedadFiltro = getFiltroHumedad(formHumedad.querySelector('select').value)
-            let progresoFiltro = getFiltroProgreso(formProgreso.querySelector('select').value)
+            // Objeto a utilizar como "filtro" con las propiedades de celda seleccionadas
             let celdaFiltro = {
-                cultivo: cultivoFiltro,
-                temperatura: temperaturaFiltro,
-                humedad: humedadFiltro,
-                progreso: progresoFiltro
+                cultivo: formatearString(formsFiltros[0].querySelector('select').value),
+                temperatura: getFiltroTemperatura(formsFiltros[1].querySelector('select').value),
+                humedad: getFiltroHumedad(formsFiltros[2].querySelector('select').value),
+                progreso: getFiltroProgreso(formsFiltros[3].querySelector('select').value)
             }
+            // Array que replica el array de celdas del campo original, pero sus celdas solo tienen un color
+            // (es necesario crear un campo de cero ya que en JS objetos se copian por referencia, no por valor)
             let arrayFiltrado = []
+            // Ciclos anidados que recorren cada celda del campo y le cambia el color segun coincide o no con el filtro
             for (let fila = 0; fila < campo.filas; fila++) {
                 let arrayFila = []
                 for (let columna = 0; columna < campo.ancho; columna++) {
+                    // Crea una celda con todas sus propiedades indefinidas
+                    // (Necesitamos crear u)
                     let celda = new HectareaCultivo(undefined, undefined, undefined, undefined, undefined)
+                    // Si coincide con el filtro, le damos color verde
                     if (compararCelda(campo.array[fila][columna], celdaFiltro)) {
                         celda.color = 'green'
                     }
+                    // Si no coincide, su color sera gris
                     else {
                         celda.color = 'grey'
                     }
@@ -654,17 +726,22 @@ function menuFiltrar() {
                 }
                 arrayFiltrado.push(arrayFila)
             }
+            // Inicializamos un nuevo campo con las celdas coloreadas segun coinciden o no con el filtro
             campoFiltrado = new Campo(arrayFiltrado, campo.ancho, campo.filas)
             limpiarPantalla()
+            // Creamos la grid del campo filtrado
             let gridCampo = getGridCampo(campoFiltrado)
             gridCampo.className = 'gridCampo'
             let gridWrapper = getNodeFromTemplate('#dataContainerSimulador').querySelector('.gridWrapper')
             gridWrapper.appendChild(gridCampo)
-
+            // Insertamos la grid con su contenedor dentro del simulador
             simulador.appendChild(gridWrapper)
+            // Centramos la grid (si no hace overflow)
             centerGrid(gridCampo)
-            let backButton = document.querySelector('#templateBackButton').content.cloneNode(true).querySelector('button')
+            // Obtiene e inserta en la pantalla el nodo del boton de "volver"
+            let backButton = getNodeFromTemplate('#templateBackButton')
             simulador.appendChild(backButton)
+            // Accion del boton de "volver"
             backButton.addEventListener('click', (e) => {
                 limpiarPantalla()
                 menuSimulador()
@@ -673,108 +750,158 @@ function menuFiltrar() {
     })
 }
 
+// Menu para simular el paso de los dias
 function menuSimularDia() {
-    let formNode = document.querySelector('#menuSimulacion').content.cloneNode(true).querySelector('form')
+    // Obtiene el menu de su template
+    let formNode = getNodeFromTemplate('#menuSimulacion')
     let selectorClima = formNode.querySelector('select')
+    // Crea la lista de inputs del formulario
     let inputs = [selectorClima]
+    // Inicializa el Form
     let form = new Form(formNode, inputs)
+    // Accion del boton de "volver"
     let backButton = formNode.querySelector('.backButton')
     backButton.addEventListener('click', () => {
         limpiarPantalla()
         menuSimulador()
     })
+    // Accion del boton de submit
     form.btnSubmit.addEventListener('click', () => {
         if (!form.submitDisable) {
+            // Lee la opcion elegida
             let opcion = selectorClima.value
+            // Determina la accion a realizar segun la opcion elegida
             switch (opcion) {
+                // Simula el paso de un dia soleado
                 case '1':
                     campo.recorrerCampo(actualizarCeldaSol);
                     toastDiaSoleado()
                     break;
+                // Simula el paso de un dia nublado
                 case '2':
                     campo.recorrerCampo(actualizarCeldaNublado);
                     toastDiaNublado()
                     break;
+                // Simula el paso de un dia de lluvia
                 case '3':
                     campo.recorrerCampo(actualizarCeldaLluvia);
                     toastDiaLluvia()
                     break;
             }
-            datosPorDia.push(new DatosDia(`Dia ${++dia}`, JSON.stringify(campo)))
+            // Guarda en el array de datos recolectados el nuevo numero de dia y el nuevo estado del campo (es necesario
+            // pasar el campo a string para tener una copia por valor, y no por referencia)
+            datosPorDia.push(new DatosDia(++dia, JSON.stringify(campo)))
         }
     })
+    // Inserta el formulario en la pantalla
     simulador.appendChild(formNode)
 }
 
+// Menu para obtener el valor promedio de una propiedad de celda (con opción de filtrar el campo a promediar)
 function menuPromedio() {
+    // Obtiene el menu de su template
     let formNode = getNodeFromTemplate('#menuPromedio')
     let dataInputs = formNode.querySelector('.dataInputs')
+    // Obtiene todos los nodos de los inputs
     let selectInputs = formNode.getElementsByTagName('select')
     let inputs = []
+    // Mete cada input en la lista de inputs
     for (let input of selectInputs) {
         inputs.push(input)
     }
+    // Inicializa el Form
     let form = new Form(formNode, inputs)
+    // Inserta el menu en la pantalla
     simulador.appendChild(formNode)
-    form.btnSubmit.addEventListener
+    // Obtiene el nodo del boton "volver"
     let backButton = formNode.querySelector('.backButton')
+    // Accion del boton "volver"
     backButton.addEventListener('click', (e) => {
         e.preventDefault()
         limpiarPantalla()
         menuSimulador()
     })
+    // Obtiene el nodo con el select que determina si se quiere filtrar el campo antes de promediar
     let filtroOpcional = formNode.querySelector('#filtrarPromedio')
+    // Flag que determina si se quiere promediar o no
     let flagFiltro = false
+    // Variable auxiliar que guarda la cantidad de filtros
+    let cantFiltros
+    // Accion del select del filtro opcional
     filtroOpcional.addEventListener('input', (e) => {
         let opcion = e.target.value
+        // Switch para cada opcion
         switch (opcion) {
+            // Si el usuario elige filtrar, añadimos al form una serie de inputs con los filtros que se pueden elegir
             case 'si':
-                let filtros = [getNodeFromTemplate('#inputCultivoFiltro'), getNodeFromTemplate('#inputHumedadFiltro'), getNodeFromTemplate('#inputTemperaturaFiltro'), getNodeFromTemplate('#inputProgresoFiltro')]
+                // Obtenemos los nodos de los inputs de los filtros opcionales
+                let filtros = [
+                    getNodeFromTemplate('#inputCultivoFiltro'), 
+                    getNodeFromTemplate('#inputHumedadFiltro'), 
+                    getNodeFromTemplate('#inputTemperaturaFiltro'), 
+                    getNodeFromTemplate('#inputProgresoFiltro')
+                ]
+                cantFiltros = filtros.length
+                // Pusheamos los nuevos inputs a la lista de inputs del form
                 for (let input of filtros) {
                     form.inputs.push(input)
                     dataInputs.insertBefore(input, dataInputs.querySelector('.submitButton'))
                 }
+                // Volvemos a inicializar los inputs del form para que deshabilitar el submit si estan vacios
                 form.inicializarInputs()
+                // Cambiamos la flag para que en proximos eventos podamos saber si el usuario habia añadido filtros
                 flagFiltro = true
                 break
             case 'no':
+                // Si anteriormente el usuario decidio filtrar el campo, reiniciamos la lista de inputs del form a sus
+                // inputs originales y borramos los inputs de filtros de la pantalla
                 if (flagFiltro) {
                     let i = 0
+                    // Reiniciamos los inputs del form
                     let inputs = form.node.getElementsByClassName('formInput')
-                    while (i < 4) {
+                    // Loop que se ejecuta 1 vez por cada input de filtro
+                    while (i < cantFiltros) {
+                        // Borra el input de la pantalla
                         inputs[inputs.length - 1].remove()
                         i++
                     }
+                    // Resetea la flag para que el programa inserte los filtros opcionales de vuelta si el usuario decide filtrar
                     flagFiltro = false
                 }
                 break
         }
     })
+    // Accion del boton de submit
     form.btnSubmit.addEventListener('click', () => {
         if (!form.submitDisable) {
-            let campoPromediado = campo
+            let campoPromediado = []
             let display = form.node.querySelector('.dataDisplay')
+            // Si el usuario decidio previamente filtrar el campo, 
             if (flagFiltro) {
+                // Creamos la celda "filtro" con las propiedades seleccionadas
                 let celdaFiltro = {
                     cultivo: formatearString(form.node.querySelector('#nombreCultivo').value),
                     temperatura: getFiltroTemperatura(form.node.querySelector('#temperaturaFiltro').value),
                     humedad: getFiltroHumedad(form.node.querySelector('#humedadFiltro').value),
                     progreso: getFiltroProgreso(form.node.querySelector('#progresoFiltro').value)
                 }
+                // Asignamos como campo a promediar al campo filtrado
                 campoPromediado = filtrarCampo(campo, celdaFiltro)
             }
             else {
-                let filasFusionadas = []
-                for (let fila of campo.array) {
-                    filasFusionadas = filasFusionadas.concat(fila)
-                }
-                campoPromediado = filasFusionadas
+                // Asignamos como campo a promediar a las celdas fusionadas del campo orignal
+                campoPromediado = campo.fusionarArrays()
             }
+            // Si no hay coincidencias con el filtro (si el array del campo filtrado esta vacio),
+            // informamos con un h3 y retornamos para que no se siga ejecutando el eventListener
             if (campoPromediado.length == 0) {
                 display.innerHTML = `<h3>No hay celdas coincidentes con el filtro</h3>`
                 return
             }
+            // Si se sigue ejecutando la funcion en este punto, mostramos en el display el valor del promedio resultante
+            // Determinamos la propiedad seleccionada
             let propiedad = form.node.querySelector('#parametroPromedio').value
+            // Determinamos con un switch la unidad del valor a promediar
             let unidad
             switch (propiedad) {
                 case 'temperatura':
@@ -785,48 +912,12 @@ function menuPromedio() {
                     unidad = '%'
                     break
             }
+            // Calculamos el promedio
             let promedio = generarPromedio(campoPromediado, propiedad)
+            // Mostramos el promedio en el display con un h3
             display.innerHTML = `<h3>Promedio obtenido: <span class="destacado">${promedio}${unidad}<span></h3>`
         }
     })
-}
-
-//! Clases y sus metodos
-class Campo {
-    constructor(array, ancho, filas) {
-        this.array = array
-        this.ancho = ancho
-        this.filas = filas
-    }
-    recorrerCampo(funcion) {
-        this.array.forEach((fila) => {
-            fila.forEach((celda) => funcion(celda))
-        })
-    }
-    fusionarArrays() {
-        let filasFusionadas = []
-        this.array.forEach((fila) => filasFusionadas = filasFusionadas.concat(fila))
-        return filasFusionadas
-    }
-}
-
-class HectareaCultivo {
-    // Constructor
-    constructor(id, cultivo, humedad, temperatura, progreso) {
-        this.id = id;
-        this.cultivo = cultivo;
-        this.humedad = humedad;
-        this.temperatura = temperatura;
-        this.progreso = progreso;
-        this.color = coloresCultivos(cultivo)
-    }
-}
-
-class DatosDia {
-    constructor(fecha, datosCampo) {
-        this.fecha = fecha
-        this.datosCampo = datosCampo
-    }
 }
 
 //!! PROGRAMA PRINCIPAL
@@ -837,12 +928,11 @@ document.body.style.marginTop = `${headerHeight + 30}px`
 
 let simulador = document.querySelector('#simulador')
 
+// Definiciones de variables globales
 let arrayCampo = []
 let anchoCampo
-
 let cantidadCultivos
 let tempInicial
-
 let campo
 
 // Objeto global para el formulario que se muestra por default 
@@ -852,7 +942,10 @@ let form1
 let datosPorDia = []
 let dia = 0
 
+// Array global en que se guardan los charts de ApexCharts.js dibujados en pantalla
 let charts = []
-menuForm1()
 
+// Mostramos, por defecto, el primer formulario
+menuForm1()
+// Chequeamos la ultima pantalla visitada por el usuario en la sesión actual
 checkLastScreen()

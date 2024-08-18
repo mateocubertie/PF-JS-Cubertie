@@ -24,6 +24,7 @@ html {
     --button-outline-color: white;
     --main-text-color: white;
     --main-font-regular: 'Inter';
+    --section-element-bg-color: #444444;
 
     --sim-display-zoom: 0.5;
 }
@@ -523,10 +524,14 @@ select {
 .dashboardChart {
     width: 100%;
     min-height: 0;
-    color: black;
     z-index: 0;
-    background-color: white;
     border-radius: 0.4rem;
+    justify-content: center;
+    text-align: center;
+}
+
+.apexcharts-tooltip {
+    color: black
 }
 
 .gridBotones {
