@@ -529,9 +529,11 @@ select {
     justify-content: center;
     text-align: center;
 }
-
+.dashboardChart .apexcharts-menu-item {
+    color: black;
+}
 .apexcharts-tooltip {
-    color: black
+    color: black;
 }
 
 .gridBotones {
