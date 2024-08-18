@@ -547,7 +547,6 @@ function menuSimulador() {
     // Dibujamos los charts
     renderLineChart(charts, datosX, arraysEstadosGuardados.map((estado) => generarPromedio(estado, 'temperatura')), chart1Node, 'Temperatura', 'Dia', '°C', 'Temperatura promedio del campo')
     renderLineChart(charts, datosX, arraysEstadosGuardados.map((estado) => generarPromedio(estado, 'humedad')), chart2Node, 'Humedad', 'Dia', '%', 'Humedad promedio del campo')
-    console.log(charts[0])
     // Obtiene el slider que determina el zoom
     let zoomSlider = simulador.querySelector('.zoomSlide')
     // Inicia con el zoom en su valor por defecto
